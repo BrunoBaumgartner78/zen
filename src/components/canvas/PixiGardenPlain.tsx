@@ -345,19 +345,25 @@ export default function PixiGardenPlain() {
     const groove = (path: Point[]) => {
       const shadowOffset = width * 0.35
       const highlightOffset = -width * 0.35
-      g.lineStyle({ width: width * 0.65, color: 0xaeaaa0, alpha: 0.75, cap: 'round', join: 'round' })
+
+      // Schatten (unten rechts)
+      g.lineStyle(width * 0.65, 0xaeaaa0, 0.75)
       path.forEach((p, i) => {
         const x = p.x + shadowOffset
         const y = p.y + shadowOffset
         if (i === 0) g.moveTo(x, y)
         else g.lineTo(x, y)
       })
-      g.lineStyle({ width: width * 0.5, color: 0xc9c3b5, alpha: 0.9, cap: 'round', join: 'round' })
+
+      // Mittelton
+      g.lineStyle(width * 0.5, 0xc9c3b5, 0.9)
       path.forEach((p, i) => {
         if (i === 0) g.moveTo(p.x, p.y)
         else g.lineTo(p.x, p.y)
       })
-      g.lineStyle({ width: width * 0.35, color: 0xffffff, alpha: 0.25, cap: 'round', join: 'round' })
+
+      // Highlight (oben links)
+      g.lineStyle(width * 0.35, 0xffffff, 0.25)
       path.forEach((p, i) => {
         const x = p.x + highlightOffset
         const y = p.y + highlightOffset
@@ -382,7 +388,7 @@ export default function PixiGardenPlain() {
         g.beginFill(0x7a8f76)
         g.drawEllipse(it.x, it.y, r * 1.15, r * 0.8)
         g.endFill()
-        g.lineStyle({ width: 2, color: 0xffffff, alpha: 0.18 })
+        g.lineStyle({ width: 2, color: 0xffffff, alpha: 0.18 } as any) // nur für Outline: TS erlaubt hier Objekt
         g.drawEllipse(it.x - r * 0.25, it.y - r * 0.25, r * 0.75, r * 0.5)
         if (selected) outline(g, it.x, it.y, r * 1.25, r * 0.9)
         break
@@ -393,7 +399,7 @@ export default function PixiGardenPlain() {
         g.beginFill(0x78947e)
         g.drawEllipse(it.x, it.y, r, r * 0.9)
         g.endFill()
-        g.lineStyle({ width: 2, color: 0xffffff, alpha: 0.2 })
+        g.lineStyle({ width: 2, color: 0xffffff, alpha: 0.2 } as any)
         g.drawEllipse(it.x - r * 0.2, it.y - r * 0.2, r * 0.65, r * 0.58)
         if (selected) outline(g, it.x, it.y, r * 1.1, r)
         break
@@ -404,7 +410,7 @@ export default function PixiGardenPlain() {
         g.beginFill(0x6f8c78)
         g.drawCircle(it.x, it.y, r)
         g.endFill()
-        g.lineStyle({ width: 2, color: 0xffffff, alpha: 0.22 })
+        g.lineStyle({ width: 2, color: 0xffffff, alpha: 0.22 } as any)
         g.drawCircle(it.x - r * 0.2, it.y - r * 0.2, r * 0.7)
         if (selected) outline(g, it.x, it.y, r * 1.1, r * 1.1, true)
         break
@@ -420,7 +426,7 @@ export default function PixiGardenPlain() {
         g.quadraticCurveTo(it.x + w / 2, it.y, it.x, it.y + h / 2)
         g.quadraticCurveTo(it.x - w / 2, it.y, it.x, it.y - h / 2)
         g.endFill()
-        g.lineStyle({ width: 2, color: 0xdde8cf, alpha: 0.7 })
+        g.lineStyle({ width: 2, color: 0xdde8cf, alpha: 0.7 } as any)
         g.moveTo(it.x - w * 0.2, it.y)
         g.quadraticCurveTo(it.x, it.y - h * 0.1, it.x + w * 0.25, it.y - h * 0.2)
         if (selected) outline(g, it.x, it.y, w * 0.7, h * 0.7)
@@ -457,10 +463,10 @@ export default function PixiGardenPlain() {
         g.beginFill(0x000000, 0.1)
         g.drawEllipse(x + 5, y + 4, w * 0.6, h * 1.2)
         g.endFill()
-        g.lineStyle({ width: 4, color: 0x8b6e49, alpha: 1 })
+        g.lineStyle(4, 0x8b6e49, 1)
         g.moveTo(x - w / 2, y)
         g.lineTo(x + w / 2 - 12, y)
-        g.lineStyle({ width: 3, color: 0x8b6e49, alpha: 1 })
+        g.lineStyle(3, 0x8b6e49, 1)
         const bx = x + w / 2 - 12
         const by = y
         for (let i = 0; i < 5; i++) {
@@ -474,7 +480,7 @@ export default function PixiGardenPlain() {
         const r = it.r ?? 34
         const rings = [r * 0.9, r * 1.15, r * 1.4]
         ;[0.25, 0.18, 0.12].forEach((alpha, idx) => {
-          g.lineStyle({ width: 4 - idx, color: 0xcfc9ba, alpha })
+          g.lineStyle(4 - idx, 0xcfc9ba, alpha)
           g.drawCircle(it.x, it.y, rings[idx])
         })
         if (selected) outline(g, it.x, it.y, r * 1.55, r * 1.55, true)
@@ -484,12 +490,12 @@ export default function PixiGardenPlain() {
   }
 
   function outline(g: Graphics, x: number, y: number, rx: number, ry: number, circle = false) {
-    g.lineStyle({ width: 2, color: 0x111111, alpha: 0.7 })
+    g.lineStyle(2, 0x111111, 0.7)
     if (circle) g.drawCircle(x, y, rx)
     else g.drawEllipse(x, y, rx, ry)
   }
   function outlineRect(g: Graphics, x: number, y: number, w: number, h: number) {
-    g.lineStyle({ width: 2, color: 0x111111, alpha: 0.7 })
+    g.lineStyle(2, 0x111111, 0.7)
     g.drawRoundedRect(x, y, w, h, 6)
   }
 
