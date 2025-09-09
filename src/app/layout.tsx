@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: {
     canonical: '/',
-    languages: { 'de-CH': '/', 'de': '/', 'en': '/?lang=en' },
+    languages: { 'de-CH': '/', de: '/', en: '/?lang=en' },
   },
   openGraph: {
     type: 'website',
@@ -47,9 +47,7 @@ export const metadata: Metadata = {
       { url: '/icon-32.png', sizes: '32x32', type: 'image/png' },
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
     ],
-    apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   robots: {
     index: true,
@@ -66,7 +64,6 @@ export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
 }
 
-// hierher gehört themeColor!
 export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#E9E3D5' },
@@ -75,7 +72,6 @@ export const viewport: Viewport = {
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-  // JSON-LD (WebSite + WebPage)
   const jsonLdWebsite = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -91,6 +87,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     url: SITE_URL,
     isPartOf: { '@type': 'WebSite', url: SITE_URL, name: 'Zen Garden' },
   }
+  const ldJson = JSON.stringify([jsonLdWebsite, jsonLdWebPage])
 
   return (
     <html lang="de" style={{ height: '100%', overflow: 'hidden' }}>
@@ -100,18 +97,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           padding: 0,
           height: '100%',
           overflow: 'hidden',
-          overscrollBehavior: 'none' as any,
           background: '#E9E3D5',
         }}
       >
         {children}
-        <script
-          type="application/ld+json"
-          // @ts-ignore
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify([jsonLdWebsite, jsonLdWebPage]),
-          }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson }} />
       </body>
     </html>
   )
