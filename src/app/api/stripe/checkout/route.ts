@@ -5,31 +5,27 @@ import { authOptions } from '@/lib/authOptions'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
-export const revalidate = 0
 
 export async function POST() {
   const session = await getServerSession(authOptions)
   const userId = (session?.user as any)?.id as string | undefined
   if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
-  const sk = process.env.STRIPE_SECRET_KEY
   const price = process.env.STRIPE_PRICE_ID
-  const base = process.env.NEXTAUTH_URL // z.B. https://blue-lotos.ch
-  if (!sk || !price || !base) {
-    return NextResponse.json(
-      { error: 'Stripe not configured (check STRIPE_SECRET_KEY, STRIPE_PRICE_ID, NEXTAUTH_URL)' },
-      { status: 503 }
-    )
+  const secret = process.env.STRIPE_SECRET_KEY
+  const origin = process.env.NEXTAUTH_URL
+  if (!price || !secret || !origin) {
+    return NextResponse.json({ error: 'stripe env missing' }, { status: 500 })
   }
 
   const Stripe = (await import('stripe')).default
-  const stripe = new Stripe(sk, { apiVersion: '2024-06-20' })
+  const stripe = new Stripe(secret, { apiVersion: '2024-06-20' })
 
   const checkout = await stripe.checkout.sessions.create({
     mode: 'payment',
     line_items: [{ price, quantity: 1 }],
-    success_url: `${base}/upgrade/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${base}/upgrade/cancel`,
+    success_url: `${origin}/upgrade/success`,
+    cancel_url: `${origin}/upgrade/cancel`,
     metadata: { userId },
   })
 
