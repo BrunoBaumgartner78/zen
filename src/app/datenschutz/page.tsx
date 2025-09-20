@@ -1,94 +1,127 @@
 // src/app/datenschutz/page.tsx
+import type { Metadata } from "next"
+import Link from "next/link"
+
+export const metadata: Metadata = {
+  title: "Datenschutzerklärung",
+  description:
+    "Informationen zur Verarbeitung personenbezogener Daten auf blue-lotos.ch (Zen Garden).",
+}
+
+// explizit statisch rendern
+export const dynamic = "force-static"
+
 export default function DatenschutzPage() {
   return (
-    <main style={{ maxWidth: 800, margin: "60px auto", padding: 20 }}>
-      <h1>Datenschutzerklärung</h1>
+    <main style={{ maxWidth: 900, margin: "40px auto", padding: "0 16px" }}>
+      <h1 style={{ fontSize: 28, marginBottom: 8 }}>Datenschutzerklärung</h1>
+      <p style={{ opacity: 0.7, marginTop: 0 }}>
+        Gültig für die Website <strong>blue-lotos.ch</strong> („Zen Garden“).
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>1. Allgemeine Hinweise</h2>
-        <p>
-          Der Schutz Ihrer persönlichen Daten ist uns ein besonderes Anliegen. 
-          Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend 
-          den gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerklärung.
-        </p>
-      </section>
+      <h2 style={{ marginTop: 28 }}>1. Verantwortliche Stelle</h2>
+      <p>
+        Bruno Baumgartner, c/o Baumgartner Development, 8000 Zürich, Schweiz ·{" "}
+        <a href="mailto:info@baumgartner-development.ch">
+          info@baumgartner-development.ch
+        </a>
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>2. Verantwortliche Stelle</h2>
-        <p>
-          Bruno Baumgartner<br />
-          Le pré-aux-Boeufs<br />
-          2615 Sonvileir, Schweiz<br />
-          E-Mail: <a href="mailto:bruno@brainbloom.ch">bruno@brainbloom.ch</a>
-        </p>
-      </section>
+      <h2 style={{ marginTop: 28 }}>2. Verarbeitete Daten</h2>
+      <ul>
+        <li>Accountdaten (E-Mail, Name – optional)</li>
+        <li>Authentifizierung (gehashte Passwörter)</li>
+        <li>„Gärten“ (Titel, Cover-Bild-URL, JSON-Daten)</li>
+        <li>Abrechnungsstatus (Premium-Flag)</li>
+        <li>Protokolldaten (z. B. IP in Server-Logs)</li>
+      </ul>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>3. Erhebung und Speicherung personenbezogener Daten</h2>
-        <p>
-          Wir erheben personenbezogene Daten, wenn Sie unsere Website nutzen, 
-          sich registrieren oder Käufe tätigen. Dazu gehören insbesondere Name, 
-          E-Mail-Adresse, Zahlungsinformationen und Nutzungsdaten.
-        </p>
-      </section>
+      <h2 style={{ marginTop: 28 }}>3. Zwecke</h2>
+      <ul>
+        <li>Bereitstellung und Betrieb der App</li>
+        <li>Anmeldung/Authentifizierung</li>
+        <li>Speichern/Teilen von Gärten</li>
+        <li>Zahlung & Abrechnung (Stripe)</li>
+        <li>Sicherheit, Missbrauchsvermeidung, Fehleranalyse</li>
+      </ul>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>4. Verwendung der Daten</h2>
-        <ul>
-          <li>Zur Bereitstellung unserer Online-Dienste</li>
-          <li>Zur Abwicklung von Bestellungen und Zahlungen</li>
-          <li>Zur Verbesserung unseres Angebots</li>
-          <li>Zur Erfüllung gesetzlicher Verpflichtungen</li>
-        </ul>
-      </section>
+      <h2 style={{ marginTop: 28 }}>4. Rechtsgrundlagen</h2>
+      <p>
+        Vertragserfüllung; berechtigte Interessen (Betrieb/Sicherheit); Einwilligung für
+        optionale Cookies/Analytics (falls aktiv).
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>5. Weitergabe an Dritte</h2>
-        <p>
-          Eine Weitergabe Ihrer Daten an Dritte erfolgt ausschliesslich zur 
-          Vertragserfüllung (z.B. Zahlungsdienstleister wie Stripe) oder wenn wir 
-          gesetzlich dazu verpflichtet sind.
-        </p>
-      </section>
+      <h2 style={{ marginTop: 28 }}>5. Empfänger / Auftragsverarbeiter</h2>
+      <ul>
+        <li>Vercel (Hosting/Blob/CDN)</li>
+        <li>Stripe (Zahlungsabwicklung)</li>
+        <li>Neon/PG (Datenbank, falls eingesetzt)</li>
+        <li>Analytics (falls aktiviert, z. B. Vercel Analytics/GA)</li>
+      </ul>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>6. Speicherung und Löschung</h2>
-        <p>
-          Wir speichern personenbezogene Daten nur so lange, wie dies für die 
-          Erfüllung der genannten Zwecke notwendig ist oder wir gesetzlich dazu 
-          verpflichtet sind. Anschliessend werden die Daten gelöscht.
-        </p>
-      </section>
+      <h2 style={{ marginTop: 28 }}>6. Drittlandtransfer</h2>
+      <p>
+        Dienste außerhalb CH/EU möglich; Schutzmechanismen (z. B. Standardvertragsklauseln)
+        werden verwendet, soweit erforderlich.
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>7. Cookies & Tracking</h2>
-        <p>
-          Unsere Website verwendet Cookies und vergleichbare Technologien, um die 
-          Nutzung zu analysieren und bestimmte Funktionen bereitzustellen. Sie 
-          können dem Einsatz von Cookies über Ihren Browser widersprechen.
-        </p>
-      </section>
+      <h2 style={{ marginTop: 28 }}>7. Speicherfristen</h2>
+      <ul>
+        <li>Accounts/Daten bis zur Löschung oder gesetzlichen Pflicht</li>
+        <li>Temporäre Dateien (Cover-Bilder) werden regelmäßig bereinigt</li>
+        <li>Logs gemäß technischen Erfordernissen</li>
+      </ul>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>8. Ihre Rechte</h2>
-        <p>
-          Sie haben jederzeit das Recht auf Auskunft, Berichtigung, Löschung und 
-          Einschränkung der Verarbeitung Ihrer Daten. Ausserdem können Sie der 
-          Verarbeitung widersprechen und haben das Recht auf Datenübertragbarkeit.
-        </p>
-        <p>
-          Bitte wenden Sie sich dazu an:{" "}
-          <a href="mailto:bruno@brainbloom.ch">bruno@brainbloom.ch</a>
-        </p>
-      </section>
+      <h2 style={{ marginTop: 28 }}>8. Cookies</h2>
+      <p>
+        Technisch notwendige Cookies sind erforderlich. Optionale Cookies (z. B. Analytics)
+        werden nur mit Einwilligung gesetzt (siehe Cookie-Banner).
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>9. Änderungen</h2>
-        <p>
-          Wir behalten uns vor, diese Datenschutzerklärung jederzeit zu ändern. 
-          Es gilt jeweils die aktuelle Version auf dieser Website.
-        </p>
-      </section>
+      <h2 style={{ marginTop: 28 }}>9. Betroffenenrechte</h2>
+      <ul>
+        <li>Auskunft, Berichtigung, Löschung, Einschränkung</li>
+        <li>Datenübertragbarkeit (soweit anwendbar)</li>
+        <li>Widerruf von Einwilligungen mit Wirkung für die Zukunft</li>
+        <li>Beschwerde bei einer Aufsichtsbehörde</li>
+      </ul>
+
+      <h2 style={{ marginTop: 28 }}>10. Sicherheit</h2>
+      <p>Angemessene technische und organisatorische Maßnahmen (z. B. Verschlüsselung).</p>
+
+      <h2 style={{ marginTop: 28 }}>11. Kontakt</h2>
+      <p>
+        Datenschutz: <a href="mailto:privacy@blue-lotos.ch">privacy@blue-lotos.ch</a>
+      </p>
+
+      <p style={{ marginTop: 28, fontSize: 13, opacity: 0.7 }}>
+        Zuletzt aktualisiert: {new Date().toISOString().slice(0, 10)}
+      </p>
+
+      <hr style={{ margin: "24px 0", opacity: 0.15 }} />
+
+      <nav style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <Link
+          href="/"
+          style={{
+            padding: "6px 10px",
+            borderRadius: 8,
+            border: "1px solid rgba(0,0,0,.12)",
+            background: "#fff",
+            color: "#111",
+            textDecoration: "none",
+            fontSize: 14,
+          }}
+        >
+          ⌂ Home
+        </Link>
+        <Link href="/impressum" style={{ textDecoration: "underline", fontSize: 14 }}>
+          Impressum
+        </Link>
+        <Link href="/agb" style={{ textDecoration: "underline", fontSize: 14 }}>
+          AGB
+        </Link>
+      </nav>
     </main>
   )
 }
