@@ -1,38 +1,77 @@
 // src/app/upgrade/success/page.tsx
-'use client'
+import Link from "next/link"
 
-import { useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useSession } from 'next-auth/react'
-import { toast } from 'sonner'
+export const dynamic = "force-dynamic" // verhindert SSG, falls gewünscht
 
-export default function UpgradeSuccessPage() {
-  const r = useRouter()
-  const qp = useSearchParams()
-  const { update } = useSession()
-  const sessionId = qp.get('session_id')
+type SP = Promise<Record<string, string | string[] | undefined>>
 
-  useEffect(() => {
-    (async () => {
-      if (!sessionId) return
-      const res = await fetch(`/api/stripe/success?session_id=${encodeURIComponent(sessionId)}`)
-      const json = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        console.error(json)
-        toast.error(json?.error ?? 'Konnte Kauf nicht verifizieren')
-        return
-      }
-      // Session sofort aktualisieren
-      await update()
-      toast.success('Premium freigeschaltet ✨')
-      r.replace('/?upgraded=1')
-    })()
-  }, [sessionId, update, r])
+export default async function SuccessPage({
+  searchParams,
+}: { searchParams: SP }) {
+  const sp = await searchParams
+  const sessionId = (Array.isArray(sp.session_id) ? sp.session_id[0] : sp.session_id) ?? ""
+  const status = (Array.isArray(sp.status) ? sp.status[0] : sp.status) ?? "success"
 
   return (
-    <main style={{maxWidth:680, margin:'60px auto', padding:20}}>
-      <h1>Danke für deinen Kauf!</h1>
-      <p>Wir verifizieren deinen Beleg…</p>
+    <main style={{ maxWidth: 720, margin: "40px auto", padding: "0 16px" }}>
+      <h1 style={{ marginBottom: 8 }}>Upgrade erfolgreich 🎉</h1>
+      <p style={{ opacity: 0.8 }}>
+        Danke dir! Dein Kauf wurde abgeschlossen.
+      </p>
+
+      <div style={{
+        marginTop: 16,
+        padding: 16,
+        borderRadius: 12,
+        border: "1px solid rgba(0,0,0,.1)",
+        background: "#fff"
+      }}>
+        <div style={{ fontSize: 14, opacity: 0.8, marginBottom: 6 }}>
+          Status:
+        </div>
+        <div style={{ fontWeight: 600 }}>{status}</div>
+
+        {sessionId ? (
+          <>
+            <div style={{ fontSize: 14, opacity: 0.8, marginTop: 12 }}>
+              Stripe Session ID:
+            </div>
+            <code style={{
+              display: "block",
+              fontSize: 13,
+              background: "#f6f6f6",
+              padding: "8px 10px",
+              borderRadius: 8,
+              overflowX: "auto"
+            }}>
+              {sessionId}
+            </code>
+          </>
+        ) : null}
+      </div>
+
+      <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+        <Link href="/" style={{
+          padding: "8px 14px",
+          borderRadius: 10,
+          border: "1px solid rgba(0,0,0,.12)",
+          background: "#fff",
+          color: "#111",
+          textDecoration: "none"
+        }}>
+          ⌂ Zur Startseite
+        </Link>
+        <Link href="/explore" style={{
+          padding: "8px 14px",
+          borderRadius: 10,
+          border: "1px solid rgba(0,0,0,.12)",
+          background: "#fff",
+          color: "#111",
+          textDecoration: "none"
+        }}>
+          Gärten entdecken
+        </Link>
+      </div>
     </main>
   )
 }
