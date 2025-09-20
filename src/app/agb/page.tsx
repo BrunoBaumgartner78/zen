@@ -1,121 +1,78 @@
 // src/app/agb/page.tsx
-export default function AgbPage() {
+import Link from "next/link"
+
+export const dynamic = "force-static" // optional: hilft Vercel beim Prerendern
+
+export default function AGBPage() {
   return (
-    <main style={{ maxWidth: 800, margin: "60px auto", padding: 20 }}>
+    <main style={{ maxWidth: 860, margin: "40px auto", padding: "0 16px" }}>
       <h1>Allgemeine Geschäftsbedingungen (AGB)</h1>
+      <p style={{ opacity: 0.8 }}>
+        Gültig für die Nutzung von <strong>Zen Garden</strong>. Ergänzend verweisen wir auf{" "}
+        <Link href="/datenschutz">Datenschutz</Link> und <Link href="/impressum">Impressum</Link>.
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>1. Geltungsbereich</h2>
-        <p>
-          Diese Allgemeinen Geschäftsbedingungen (AGB) regeln die Nutzung der
-          Online-Anwendung <strong>Zen Garden</strong> (nachfolgend „Anwendung“)
-          sowie den Erwerb von kostenpflichtigen Premium-Leistungen. Mit der
-          Registrierung oder Nutzung der Anwendung akzeptieren Sie diese AGB.
-        </p>
-      </section>
+      <h2>1. Geltungsbereich</h2>
+      <p>
+        Diese AGB regeln Nutzung der Web-App (inkl. optionalem Upgrade). Abweichende Bedingungen
+        gelten nur bei schriftlicher Zustimmung.
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>2. Anbieter</h2>
-        <p>
-          Bruno Baumgartner <br />
-          Le pré-aux-Boeufs <br />
-          2615 Sonvilier, Schweiz <br />
-          E-Mail:{" "}
-          <a href="mailto:bruno@brainbloom.ch">bruno@brainbloom.ch</a>
-        </p>
-      </section>
+      <h2>2. Leistungen & Konto</h2>
+      <ul>
+        <li>Basisfunktionen kostenlos; Upgrade gegen Entgelt.</li>
+        <li>Registrierte Nutzer sind verantwortlich für die Sicherung ihrer Zugangsdaten.</li>
+      </ul>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>3. Leistungen</h2>
-        <ul>
-          <li>
-            Basisnutzung der Anwendung (kostenfrei, eingeschränkte Funktionen)
-          </li>
-          <li>
-            Premium-Upgrade (kostenpflichtig, zusätzliche Funktionen wie
-            Wintermodus, erweiterte Objekte, Teilen von Inhalten)
-          </li>
-        </ul>
-      </section>
+      <h2>3. Preise & Zahlung</h2>
+      <ul>
+        <li>Preise inkl. gesetzlicher Abgaben, sofern anwendbar.</li>
+        <li>Zahlung über Stripe; es gelten die Stripe-Bedingungen.</li>
+      </ul>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>4. Registrierung & Benutzerkonto</h2>
-        <p>
-          Für die Nutzung der Premium-Funktionen ist eine Registrierung mit
-          E-Mail und Passwort erforderlich. Die Zugangsdaten dürfen nicht an
-          Dritte weitergegeben werden. Sie sind für alle Aktivitäten unter Ihrem
-          Konto verantwortlich.
-        </p>
-      </section>
+      <h2>4. Kündigung / Widerruf</h2>
+      <p>
+        Das Upgrade kann jederzeit zum nächsten Abrechnungszeitraum gekündigt werden. Gesetzliche
+        Widerrufsrechte bleiben unberührt.
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>5. Preise & Zahlung</h2>
-        <p>
-          Das Premium-Upgrade ist kostenpflichtig. Der aktuell gültige Preis
-          wird vor Abschluss des Kaufvorgangs angezeigt. Die Abwicklung erfolgt
-          über den Zahlungsanbieter <strong>Stripe</strong>. Alle Preise sind in
-          Schweizer Franken (CHF) angegeben und beinhalten, soweit zutreffend,
-          die gesetzliche Mehrwertsteuer.
-        </p>
-      </section>
+      <h2>5. Nutzungsrechte & Inhalte</h2>
+      <ul>
+        <li>Du erhältst ein einfaches, nicht übertragbares Nutzungsrecht an der App.</li>
+        <li>Unzulässige Inhalte (rechtswidrig, verletzend) sind verboten.</li>
+      </ul>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>6. Widerrufsrecht</h2>
-        <p>
-          Da es sich um eine digitale Dienstleistung handelt, die unmittelbar
-          nach Kauf bereitgestellt wird, erlischt das gesetzliche
-          Widerrufsrecht mit Beginn der Ausführung. Durch den Kauf des
-          Premium-Upgrades erklären Sie ausdrücklich Ihr Einverständnis, dass
-          die Ausführung sofort beginnt.
-        </p>
-      </section>
+      <h2>6. Verfügbarkeit & Wartung</h2>
+      <p>
+        Wir bemühen uns um hohe Verfügbarkeit; es kann zu Wartungsfenstern kommen. Es besteht kein
+        Anspruch auf permanente Verfügbarkeit.
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>7. Verfügbarkeit</h2>
-        <p>
-          Wir bemühen uns, eine möglichst unterbrechungsfreie Verfügbarkeit der
-          Anwendung sicherzustellen. Ein Anspruch auf ständige Verfügbarkeit
-          besteht jedoch nicht.
-        </p>
-      </section>
+      <h2>7. Haftung</h2>
+      <p>
+        Haftung für Vorsatz und grobe Fahrlässigkeit; im Übrigen nur bei Verletzung
+        wesentlicher Vertragspflichten, beschränkt auf den typischen vorhersehbaren Schaden.
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>8. Haftung</h2>
-        <p>
-          Die Nutzung der Anwendung erfolgt auf eigene Gefahr. Der Anbieter
-          übernimmt keine Haftung für Datenverluste, Ausfälle oder Schäden, die
-          durch die Nutzung entstehen, ausser bei Vorsatz oder grober
-          Fahrlässigkeit.
-        </p>
-      </section>
+      <h2>8. Datenschutz</h2>
+      <p>
+        Verarbeitung personenbezogener Daten gemäß unserer{" "}
+        <Link href="/datenschutz">Datenschutzerklärung</Link>.
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>9. Datenschutz</h2>
-        <p>
-          Es gilt die{" "}
-          <a href="/datenschutz" style={{ textDecoration: "underline" }}>
-            Datenschutzerklärung
-          </a>
-          . Personenbezogene Daten werden ausschliesslich zur Bereitstellung der
-          Anwendung und zur Abwicklung des Premium-Upgrades verarbeitet.
-        </p>
-      </section>
+      <h2>9. Schlussbestimmungen</h2>
+      <ul>
+        <li>Es gilt schweizerisches Recht, zwingende Vorschriften bleiben vorbehalten.</li>
+        <li>Gerichtsstand nach gesetzlichen Regeln.</li>
+      </ul>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>10. Änderungen der AGB</h2>
-        <p>
-          Der Anbieter behält sich vor, diese AGB jederzeit zu ändern. Die
-          jeweils gültige Version wird auf dieser Seite veröffentlicht.
-        </p>
-      </section>
+      <p style={{ opacity: 0.7, marginTop: 32 }}>
+        Stand: {new Date().toISOString().slice(0, 10)}
+      </p>
 
-      <section style={{ marginBottom: 32 }}>
-        <h2>11. Gerichtsstand & Anwendbares Recht</h2>
-        <p>
-          Es gilt ausschliesslich Schweizer Recht. Gerichtsstand ist Zürich,
-          Schweiz, soweit zwingendes Recht nichts anderes vorsieht.
-        </p>
-      </section>
+      <div style={{ marginTop: 24 }}>
+        <Link href="/" style={{ textDecoration: "none" }}>← Zur Startseite</Link>
+      </div>
     </main>
   )
 }
