@@ -1,10 +1,11 @@
 // src/app/page.tsx
+import { Suspense } from 'react'
 import HomeClient from '@/components/HomeClient'
 
 export default function Page() {
   return (
-    <main>
+    <Suspense fallback={null}>
       <HomeClient />
-    </main>
+    </Suspense>
   )
 }
