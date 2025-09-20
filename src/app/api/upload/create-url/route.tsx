@@ -6,20 +6,24 @@ import { authOptions } from '@/lib/authOptions'
 
 export const runtime = 'nodejs'
 
-// === Settings ===
-// Falls du nur eingeloggten Usern Upload erlauben willst -> true
+// ==== Settings ====
+// nur eingeloggte Nutzer dürfen Upload-URLs anfordern?
 const REQUIRE_AUTH = true
 
-// kleine Helper
+// ==== Helpers ====
 function need(name: string, v: string | undefined) {
   if (!v) throw new Error(`ENV fehlend: ${name}`)
   return v
 }
 
+function safeJson<T = any>(req: Request): Promise<T> {
+  return req.json().catch(() => ({} as T))
+}
+
 export async function POST(req: Request) {
   try {
-    // Lokal brauchst du das Token, auf Vercel nicht zwingend – aber wir prüfen,
-    // und geben eine verständliche 400 zurück statt 500:
+    // Lokal brauchst du das Blob-Token. Auf Vercel liefert die Integration es automatisch.
+    // Wir erzwingen es *nur* lokal, damit der Fehler verständlich ist.
     if (process.env.VERCEL !== '1') {
       need('BLOB_READ_WRITE_TOKEN', process.env.BLOB_READ_WRITE_TOKEN)
     }
@@ -32,39 +36,52 @@ export async function POST(req: Request) {
     }
 
     // Body lesen (optional)
-    const body = await req.json().catch(() => ({} as any))
-    const folder      = (body?.folder as string) || 'gardens'
-    const contentType = (body?.contentType as string) || 'image/png'
-    const ext         = (body?.ext as string) || (contentType.split('/')[1] ?? 'bin')
+    const body = await safeJson(req) as {
+      folder?: string
+      contentType?: string
+      ext?: string
+      filenameHint?: string
+    }
 
-    // Dateiname bauen
-    const ms  = Date.now()
-    const key = `${folder}/${ms}.${ext.replace(/^\./, '')}`
+    const folder = (body.folder || 'gardens').replace(/^\//, '').replace(/\/+$/,'')
+    const contentType = body.contentType || 'image/png'
 
-    // Presigned URL erzeugen (public read)
+    // Dateiendung
+    const ext =
+      (body.ext?.replace(/^\./, '') ||
+        contentType.split('/')[1] ||
+        'bin').toLowerCase()
+
+    // eindeutiger Key
+    const ms = Date.now()
+    const key = `${folder}/${ms}.${ext}`
+
+    // Presigned Upload URL (public read)
     const { url, pathname } = await generateUploadUrl({
       pathname: key,
       contentType,
       access: 'public',
-      // Hinweis: addRandomSuffix ist hier nicht nötig, da der Key bereits eindeutig ist.
+      // addRandomSuffix nicht nötig, Key ist schon unique
     })
 
-    return NextResponse.json({ ok: true, url, pathname, contentType })
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err)
-    console.error('[upload/create-url] ERROR:', msg)
-    return NextResponse.json({ ok: false, error: msg }, { status: 400 })
+    return NextResponse.json({
+      ok: true,
+      url,          // PUT-URL für den Upload
+      pathname,     // endgültiger Blob-Pfad (für DB/Referenz)
+      contentType,
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[upload/create-url] ERROR:', message)
+    const status = message.startsWith('ENV fehlend') ? 400 : 500
+    return NextResponse.json({ ok: false, error: message }, { status })
   }
 }
 
 export async function GET() {
   return NextResponse.json({
     ok: true,
-    hint: 'POST mit JSON { folder?, contentType?, ext? } liefert eine presigned PUT URL.',
-    example: {
-      folder: 'gardens',
-      contentType: 'image/png',
-      ext: 'png',
-    },
+    hint: 'POST JSON { folder?, contentType?, ext? } → presigned PUT URL',
+    example: { folder: 'gardens', contentType: 'image/png', ext: 'png' },
   })
 }
