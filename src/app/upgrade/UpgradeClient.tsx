@@ -106,7 +106,7 @@ export default function UpgradeClient() {
           <details style={styles.details}>
             <summary style={styles.summary}>Wie erhalte ich Support?</summary>
             <p style={styles.answer}>
-              Schreibe uns direkt aus der App – Premium-Anfragen werden priorisiert.
+              Schreibe uns direkt auf bruno@brainbloom.ch – Premium-Anfragen werden priorisiert.
             </p>
           </details>
         </aside>
