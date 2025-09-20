@@ -1,32 +1,42 @@
+// src/app/api/stripe/confirm/route.ts
 import { NextResponse } from 'next/server'
-import Stripe from 'stripe'
-import { db } from '@/db/db'
-import { users } from '@/db/schema-users'
-import { eq } from 'drizzle-orm'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' })
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
-export async function GET(req: Request) {
+export async function POST(req: Request) {
+  // Stripe nur zur Laufzeit laden
+  const sk = process.env.STRIPE_SECRET_KEY
+  if (!sk) {
+    return NextResponse.json(
+      { error: 'Stripe not configured (missing STRIPE_SECRET_KEY)' },
+      { status: 503 }
+    )
+  }
+
+  const { sessionId } = await req.json().catch(() => ({} as { sessionId?: string }))
+  if (!sessionId) {
+    return NextResponse.json({ error: 'missing sessionId' }, { status: 400 })
+  }
+
+  const Stripe = (await import('stripe')).default
+  const stripe = new Stripe(sk, { apiVersion: '2024-06-20' })
+
   try {
-    const url = new URL(req.url)
-    const sid = url.searchParams.get('session_id')
-    if (!sid) return NextResponse.json({ error: 'missing session_id' }, { status: 400 })
-
-    const s = await stripe.checkout.sessions.retrieve(sid)
-    if (s.payment_status !== 'paid') {
-      return NextResponse.json({ error: 'not paid' }, { status: 402 })
-    }
-
-    const userId = (s.metadata?.userId ?? '').trim()
-    if (!userId) return NextResponse.json({ error: 'no userId' }, { status: 400 })
-
-    await db.update(users)
-      .set({ hasPremium: true, premiumSince: new Date().toISOString() })
-      .where(eq(users.id, userId))
-
-    return NextResponse.json({ ok: true })
-  } catch (e) {
-    console.error('[stripe/confirm] error', e)
-    return NextResponse.json({ error: 'internal' }, { status: 500 })
+    const sess = await stripe.checkout.sessions.retrieve(sessionId)
+    // Du kannst hier optional mehr Infos zurückgeben oder eigene Business-Logik einbauen
+    return NextResponse.json({
+      id: sess.id,
+      payment_status: sess.payment_status,
+      customer: sess.customer,
+      amount_total: sess.amount_total,
+      currency: sess.currency,
+    })
+  } catch (err) {
+    return NextResponse.json(
+      { error: 'failed_to_retrieve_session' },
+      { status: 500 }
+    )
   }
 }
