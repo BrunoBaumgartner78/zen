@@ -1,40 +1,33 @@
-// src/app/twitter-image.tsx
+// src/app/twitter-image/route.ts
 import { ImageResponse } from 'next/og'
 
-export const size = { width: 1200, height: 630 } // Twitter large summary akzeptiert 2:1 oder 1200x600/630
+export const runtime = 'edge'
 export const contentType = 'image/png'
+export const size = { width: 1200, height: 630 }
 
-export default function TwitterImage() {
-  const { width, height } = size
+export async function GET() {
   return new ImageResponse(
     (
       <div
         style={{
-          display: 'flex',
-          width,
-          height,
-          background: '#E5DED7',
-          alignItems: 'center',
+          width: '100%',
+          height: '100%',
+          display: 'flex',                // ⬅️ important
+          flexDirection: 'column',
           justifyContent: 'center',
+          alignItems: 'center',
+          background: 'linear-gradient(135deg, #E9E3D5, #D8D3C6)',
+          padding: 60,
         }}
       >
-        <div style={{ textAlign: 'center' }}>
-          <div
-            style={{
-              fontSize: 60,
-              fontWeight: 800,
-              letterSpacing: 1,
-              color: '#1b1b1b',
-            }}
-          >
-            Zen Garden
-          </div>
-          <div style={{ fontSize: 26, color: '#4b4b4b', marginTop: 10 }}>
-            daily calm · made with Pixi.js
-          </div>
+        <div style={{ display: 'flex', fontSize: 80, fontWeight: 700, letterSpacing: -1 }}>
+          Zen Garden
+        </div>
+        <div style={{ display: 'flex', marginTop: 20, fontSize: 36 }}>
+          Ruhige Sandkunst im Browser
         </div>
       </div>
     ),
-    { ...size }
+    size
   )
 }
