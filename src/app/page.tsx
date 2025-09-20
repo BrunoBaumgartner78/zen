@@ -1,6 +1,10 @@
 // src/app/page.tsx
-import ClientPage from '../components/ClientPage'
+import HomeClient from '@/components/HomeClient'
 
 export default function Page() {
-  return <ClientPage />
+  return (
+    <main>
+      <HomeClient />
+    </main>
+  )
 }

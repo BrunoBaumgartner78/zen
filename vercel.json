@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cleanup?ttl=5&prefixes=gardens/,cards/&dry=0&max=200",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cleanup-expired?grace=30&dry=0&max=500",
+      "schedule": "30 3 * * 0"
+    }
+  ]
+}
