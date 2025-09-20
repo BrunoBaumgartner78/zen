@@ -1,33 +1,56 @@
 // src/app/api/stripe/checkout/route.ts
-import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/authOptions'
+import { NextResponse, NextRequest } from "next/server";
+import Stripe from "stripe";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions"; // <- Pfad an dein Projekt anpassen
 
-export const runtime = 'nodejs'
-export const dynamic = 'force-dynamic'
+export const runtime = "nodejs";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2024-06-20" });
 
-export async function POST() {
-  const session = await getServerSession(authOptions)
-  const userId = (session?.user as any)?.id as string | undefined
-  if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+function abs(url: string) {
+  // Stelle sicher, dass NEXTAUTH_URL gesetzt ist, z.B. https://www.blue-lotos.ch
+  const base = process.env.NEXTAUTH_URL!;
+  return url.startsWith("http") ? url : `${base.replace(/\/$/, "")}${url.startsWith("/") ? "" : "/"}${url}`;
+}
 
-  const price = process.env.STRIPE_PRICE_PREMIUM
-  const secret = process.env.STRIPE_SECRET_KEY
-  const origin = process.env.NEXTAUTH_URL
-  if (!price || !secret || !origin) {
-    return NextResponse.json({ error: 'stripe env missing' }, { status: 500 })
+async function createCheckoutSession() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return { error: "unauthorized" as const };
   }
 
-  const Stripe = (await import('stripe')).default
-  const stripe = new Stripe(secret, { apiVersion: '2024-06-20' })
+  const price = process.env.STRIPE_PRICE_PREMIUM || process.env.STRIPE_PRICE_ID;
+  if (!price) return { error: "STRIPE_PRICE_ID/STRIPE_PRICE_PREMIUM not set" as const };
 
   const checkout = await stripe.checkout.sessions.create({
-    mode: 'payment',
+    mode: "payment",
     line_items: [{ price, quantity: 1 }],
-    success_url: `${origin}/upgrade/success`,
-    cancel_url: `${origin}/upgrade/cancel`,
-    metadata: { userId },
-  })
+    success_url: abs("/upgrade/success"),
+    cancel_url: abs("/upgrade/cancel"),
+    metadata: { app_user_id: String((session.user as any).id ?? "") },
+  });
 
-  return NextResponse.json({ url: checkout.url })
+  return { url: checkout.url! };
+}
+
+export async function POST(req: NextRequest) {
+  const result = await createCheckoutSession();
+  if ("error" in result) return NextResponse.json(result, { status: 401 });
+
+  // Wenn Fetch/AJAX: JSON zurückgeben
+  const acceptsJson = req.headers.get("accept")?.includes("application/json");
+  if (acceptsJson) return NextResponse.json({ url: result.url });
+
+  // Ansonsten direkt weiterleiten
+  return NextResponse.redirect(result.url, { status: 303 });
+}
+
+// Optional für manuelles Testen im Browser:
+// GET erzeugt ebenfalls eine Session und leitet sofort weiter.
+export async function GET() {
+  const result = await createCheckoutSession();
+  if ("error" in result) {
+    return NextResponse.json(result, { status: 401 });
+  }
+  return NextResponse.redirect(result.url, { status: 303 });
 }
