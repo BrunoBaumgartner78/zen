@@ -1,3 +1,4 @@
+// src/app/opengraph-image/route.tsx
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
@@ -20,6 +21,8 @@ export async function GET() {
           fontSize: 80,
           fontWeight: 700,
           letterSpacing: -1.5,
+          fontFamily:
+            'system-ui, ui-sans-serif, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji',
         }}
       >
         Zen Garden
