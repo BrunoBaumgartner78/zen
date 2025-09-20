@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { put } from '@vercel/blob'
-import { authOptions } from '../../auth/[...nextauth]/route' // passe ggf. Pfad an
+import { authOptions } from "@/lib/authOptions" // ✅ zentral importieren
+
 
 export const runtime = 'nodejs'
 
