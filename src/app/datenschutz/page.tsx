@@ -21,9 +21,9 @@ export default function DatenschutzPage() {
 
       <h2 style={{ marginTop: 28 }}>1. Verantwortliche Stelle</h2>
       <p>
-        Bruno Baumgartner, c/o Baumgartner Development, 8000 Zürich, Schweiz ·{" "}
-        <a href="mailto:info@baumgartner-development.ch">
-          info@baumgartner-development.ch
+        Bruno Baumgartner, c/o Baumgartner Development, 2615 Sonvilier, Schweiz ·{" "}
+        <a href="mailto:bruno@brainbloom.ch">
+          bruno@brainbloom.ch
         </a>
       </p>
 
@@ -91,7 +91,7 @@ export default function DatenschutzPage() {
 
       <h2 style={{ marginTop: 28 }}>11. Kontakt</h2>
       <p>
-        Datenschutz: <a href="mailto:privacy@blue-lotos.ch">privacy@blue-lotos.ch</a>
+        Datenschutz: <a href="mailto:bruno@brainbloom.ch">bruno@brainbloom.ch</a>
       </p>
 
       <p style={{ marginTop: 28, fontSize: 13, opacity: 0.7 }}>

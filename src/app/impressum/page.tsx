@@ -21,11 +21,11 @@ export default function ImpressumPage() {
       <h2 style={{ marginTop: 28 }}>Verantwortlich</h2>
       <p>
         Bruno Baumgartner<br />
-        c/o Baumgartner Development<br />
-        8000 Zürich, Schweiz<br />
+        c/o Le pré-aux-Boufes 222<br />
+        2615 Sonvilier, Schweiz<br />
         E-Mail:{" "}
-        <a href="mailto:info@baumgartner-development.ch">
-          info@baumgartner-development.ch
+        <a href="mailto:bruno@brainbloom.ch">
+          bruno@brainbloom.ch
         </a>
       </p>
 
@@ -44,7 +44,7 @@ export default function ImpressumPage() {
       <h2 style={{ marginTop: 28 }}>Kontakt bei Rechtsanfragen</h2>
       <p>
         Bitte richten Sie Anfragen an{" "}
-        <a href="mailto:legal@blue-lotos.ch">legal@blue-lotos.ch</a>.
+        <a href="mailto:bruno@brainbloom.ch">bruno@brainbloom.ch</a>.
       </p>
 
       <p style={{ marginTop: 28, fontSize: 13, opacity: 0.7 }}>
