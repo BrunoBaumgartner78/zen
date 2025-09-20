@@ -1,38 +1,47 @@
-'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { signIn } from 'next-auth/react'
-import { toast } from 'sonner'
+// src/app/api/register/route.ts
+import { NextResponse } from "next/server"
+import { db } from "@/db/db"
+import { users } from "@/db/schema-users"
+import { eq } from "drizzle-orm"
+import bcrypt from "bcryptjs"
+import { randomUUID } from "crypto"
+import { z } from "zod"
 
-export default function RegisterPage() {
-  const r = useRouter()
-  const [name,setName] = useState('')
-  const [email,setEmail] = useState('')
-  const [pw,setPw] = useState('')
+export const runtime = "nodejs"
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault()
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers:{'content-type':'application/json'},
-      body: JSON.stringify({ name, email, password: pw })
+const schema = z.object({
+  name: z.string().trim().max(120).optional(),
+  email: z.string().email().max(254),
+  password: z.string().min(8).max(128),
+})
+
+export async function POST(req: Request) {
+  try {
+    const json = await req.json().catch(() => null)
+    const parsed = schema.safeParse(json)
+    if (!parsed.success) {
+      return NextResponse.json({ error: "validation_failed", issues: parsed.error.flatten() }, { status: 400 })
+    }
+
+    const email = parsed.data.email.trim().toLowerCase()
+    const name = (parsed.data.name ?? "").trim()
+    const exists = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1)
+    if (exists.length) return NextResponse.json({ error: "email_taken" }, { status: 409 })
+
+    const passwordHash = await bcrypt.hash(parsed.data.password, 12)
+
+    await db.insert(users).values({
+      id: randomUUID(),
+      email,
+      name: name || null,
+      passwordHash,
+      hasPremium: false,
+      premiumSince: null,
     })
-    if (!res.ok) { toast.error('Registrierung fehlgeschlagen'); return }
-    toast.success('Registriert – bitte einloggen')
-    // optional: auto-login
-    await signIn('credentials', { email, password: pw, redirect: false })
-    r.push('/')
-  }
 
-  return (
-    <main style={{maxWidth:420, margin:'60px auto', padding:20}}>
-      <h1>Registrieren</h1>
-      <form onSubmit={submit} style={{display:'grid', gap:12}}>
-        <input placeholder="Name" value={name} onChange={e=>setName(e.target.value)} />
-        <input placeholder="E-Mail" type="email" value={email} onChange={e=>setEmail(e.target.value)} />
-        <input placeholder="Passwort" type="password" value={pw} onChange={e=>setPw(e.target.value)} />
-        <button type="submit">Account anlegen</button>
-      </form>
-    </main>
-  )
+    return NextResponse.json({ ok: true }, { status: 201 })
+  } catch (e) {
+    console.error("[api/register] error", e)
+    return NextResponse.json({ error: "server_error" }, { status: 500 })
+  }
 }
