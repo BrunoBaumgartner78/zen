@@ -25,6 +25,7 @@ async function createCheckoutSession() {
   const checkout = await stripe.checkout.sessions.create({
     mode: "payment",
     line_items: [{ price, quantity: 1 }],
+    allow_promotion_codes: true,   // 👈 das hier
     success_url: abs("/upgrade/success"),
     cancel_url: abs("/upgrade/cancel"),
     metadata: { app_user_id: String((session.user as any).id ?? "") },
