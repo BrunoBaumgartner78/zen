@@ -7,7 +7,7 @@ import { desc, eq, count } from 'drizzle-orm'
 const PAGE_SIZE = 12
 export const dynamic = 'force-dynamic'
 
-// In Next.js 15 ist searchParams ein Promise → awaiten
+// Next.js 15: searchParams ist ein Promise → awaiten
 export default async function ExplorePage({
   searchParams,
 }: {
@@ -45,19 +45,37 @@ export default async function ExplorePage({
 
   return (
     <main style={{ maxWidth: 1200, margin: '40px auto', padding: '0 16px' }}>
-      <h1 style={{ marginBottom: 8 }}>Explore</h1>
-      <p style={{ opacity: 0.7, marginTop: 0 }}>
-        {total} öffentliche Gärten · Seite {safePage} / {totalPages}
-      </p>
+      <header style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+        <h1 style={{ margin: 0 }}>Explore</h1>
+        <span style={{ opacity: 0.7 }}>
+          {total} öffentliche Gärten · Seite {safePage} / {totalPages}
+        </span>
+        <Link
+          href="/"
+          style={{
+            marginLeft: 'auto',
+            padding: '6px 10px',
+            borderRadius: 8,
+            border: '1px solid rgba(0,0,0,.12)',
+            background: '#fff',
+            color: '#111',
+            textDecoration: 'none',
+            fontSize: 14,
+          }}
+        >
+          ⌂ Home
+        </Link>
+      </header>
 
       {items.length === 0 ? (
-        <p>Keine Einträge vorhanden.</p>
+        <p style={{ marginTop: 20 }}>Keine Einträge vorhanden.</p>
       ) : (
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))',
             gap: 16,
+            marginTop: 20,
           }}
         >
           {items.map((g) => (
@@ -82,17 +100,13 @@ export default async function ExplorePage({
                   overflow: 'hidden',
                 }}
               >
+                {/* Du kannst hier optional next/image einsetzen */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 {g.coverUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={g.coverUrl}
                     alt={g.title}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      display: 'block',
-                    }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                 ) : null}
               </div>
@@ -112,7 +126,7 @@ export default async function ExplorePage({
                 </div>
                 {g.createdAt ? (
                   <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
-                    {new Date(g.createdAt as unknown as string).toLocaleDateString()}
+                    {new Date(g.createdAt as any).toLocaleDateString()}
                   </div>
                 ) : null}
               </div>
@@ -121,27 +135,16 @@ export default async function ExplorePage({
         </div>
       )}
 
-      {/* Pagination + Home-Link */}
-      <nav style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+      <nav style={{ display: 'flex', gap: 8, marginTop: 20, flexWrap: 'wrap' }}>
         <PageLink label="« Zurück" page={Math.max(1, safePage - 1)} disabled={safePage <= 1} />
-        <span style={{ padding: '6px 10px' }}>Seite {safePage} / {totalPages}</span>
-        <PageLink label="Weiter »" page={Math.min(totalPages, safePage + 1)} disabled={safePage >= totalPages} />
-
-        <Link
-          href="/"
-          style={{
-            marginLeft: 'auto',
-            padding: '6px 10px',
-            borderRadius: 8,
-            border: '1px solid rgba(0,0,0,.12)',
-            background: '#fff',
-            color: '#111',
-            textDecoration: 'none',
-            fontSize: 14,
-          }}
-        >
-          ⌂ Home
-        </Link>
+        <span style={{ padding: '6px 10px' }}>
+          Seite {safePage} / {totalPages}
+        </span>
+        <PageLink
+          label="Weiter »"
+          page={Math.min(totalPages, safePage + 1)}
+          disabled={safePage >= totalPages}
+        />
       </nav>
     </main>
   )
