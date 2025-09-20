@@ -39,7 +39,7 @@ export default function UpgradeClient() {
             </div>
             <div style={styles.priceBox}>
               <div style={styles.priceRow}>
-                <span style={styles.price}>14</span>
+                <span style={styles.price}>10</span>
                 <span style={styles.priceUnit}>CHF</span>
               </div>
               <div style={styles.priceNote}>einmaliger Beitrag</div>
