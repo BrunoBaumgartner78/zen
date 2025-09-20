@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/authOptions"
 export const runtime = "nodejs"
 
 const stripeSecret = process.env.STRIPE_SECRET_KEY
-const priceId = process.env.STRIPE_PRICE_ID
+const priceId = process.env.STRIPE_PRICE_PREMIUM
 
 // Fallback-Reihenfolge für die Basis-URL (Production/Preview/Local)
 const ORIGIN =
@@ -19,7 +19,7 @@ if (!stripeSecret) {
   console.warn("[/api/stripe/checkout] STRIPE_SECRET_KEY fehlt")
 }
 if (!priceId) {
-  console.warn("[/api/stripe/checkout] STRIPE_PRICE_ID fehlt")
+  console.warn("[/api/stripe/checkout] STRIPE_PRICE_PREMIUM fehlt")
 }
 
 const stripe = new Stripe(stripeSecret ?? "", { apiVersion: "2024-06-20" })

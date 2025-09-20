@@ -11,7 +11,7 @@ export async function POST() {
   const userId = (session?.user as any)?.id as string | undefined
   if (!userId) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
-  const price = process.env.STRIPE_PRICE_ID
+  const price = process.env.STRIPE_PRICE_PREMIUM
   const secret = process.env.STRIPE_SECRET_KEY
   const origin = process.env.NEXTAUTH_URL
   if (!price || !secret || !origin) {
