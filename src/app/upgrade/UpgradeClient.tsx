@@ -184,6 +184,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#fff',
     border: '1px solid rgba(0,0,0,.08)',
     boxShadow: '0 8px 30px rgba(0,0,0,.06)',
+    color: ' rgba(0,0,0,.06)',
     padding: 18,
   },
   cardHeader: {
@@ -401,24 +402,5 @@ const responsiveCss = `
   [data-upgrade] [data-card] .planSubtitle {
     font-size: 13px !important;
   }
-}
 
-/* Dark Mode (optional) */
-@media (prefers-color-scheme: dark) {
-  [data-upgrade] [data-card],
-  [data-upgrade] .sideCard {
-    background: #0b0b0b !important;
-    color: #eaeaea !important;
-    border-color: rgba(255,255,255,.08) !important;
-    box-shadow: 0 8px 30px rgba(0,0,0,.5) !important;
-  }
-  [data-upgrade] .features li {
-    background: #0e0e0e !important;
-    border-color: rgba(255,255,255,.06) !important;
-  }
-  [data-upgrade] .trustPill {
-    background: #0e0e0e !important;
-    border-color: rgba(255,255,255,.06) !important;
-  }
-}
 `
