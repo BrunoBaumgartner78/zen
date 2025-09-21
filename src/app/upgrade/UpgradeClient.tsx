@@ -9,29 +9,28 @@ export default function UpgradeClient() {
   const plan = useMemo(() => sp.get('plan') ?? 'premium', [sp])
   const [submitting, setSubmitting] = useState(false)
 
-  const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    // Button-Feedback: verhindert Doppel-Klicks
-    setSubmitting(true)
+  const onSubmit: React.FormEventHandler<HTMLFormElement> = () => {
+    setSubmitting(true) // verhindert Doppel-Klicks
   }
 
   return (
-    <main style={styles.main}>
+    <main style={styles.main} data-upgrade>
       {/* Hero */}
-      <section style={styles.hero}>
+      <section style={styles.hero} data-hero>
         <div style={styles.heroInner}>
           <span style={styles.badge}>Neu</span>
           <h1 style={styles.h1}>Werde Premium</h1>
           <p style={styles.subtitle}>
-            Unbegrenzte Gärten, schnellere Verarbeitung und priorisierter Support – 
+            Unbegrenzte Gärten, schnellere Verarbeitung und priorisierter Support –
             alles im <strong>Plan „{capitalize(plan)}“</strong>.
           </p>
         </div>
         <div style={styles.heroGlow} aria-hidden />
       </section>
 
-      {/* Pricing Card */}
-      <section style={styles.wrap}>
-        <article style={styles.card}>
+      {/* Pricing + FAQ */}
+      <section style={styles.wrap} className="wrap" data-wrap>
+        <article style={styles.card} className="card" data-card>
           <header style={styles.cardHeader}>
             <div>
               <h2 style={styles.planTitle}>Premium</h2>
@@ -88,21 +87,23 @@ export default function UpgradeClient() {
           </div>
         </article>
 
-        {/* FAQ / Hinweis */}
-        <aside style={styles.sideCard}>
+        <aside style={styles.sideCard} className="sideCard" data-side>
           <h3 style={styles.sideTitle}>Häufige Fragen</h3>
+
           <details style={styles.details}>
             <summary style={styles.summary}>Brauche ich ein Konto?</summary>
             <p style={styles.answer}>
               Ja – bitte melde dich an. Der Zugang wird mit deinem Benutzerkonto verknüpft.
             </p>
           </details>
+
           <details style={styles.details}>
             <summary style={styles.summary}>Was passiert nach dem Kauf?</summary>
             <p style={styles.answer}>
               Du wirst zurückgeleitet und dein Konto sofort auf Premium umgestellt.
             </p>
           </details>
+
           <details style={styles.details}>
             <summary style={styles.summary}>Wie erhalte ich Support?</summary>
             <p style={styles.answer}>
@@ -111,6 +112,9 @@ export default function UpgradeClient() {
           </details>
         </aside>
       </section>
+
+      {/* Responsive Tweaks */}
+      <style>{responsiveCss}</style>
     </main>
   )
 }
@@ -119,7 +123,7 @@ function capitalize(s: string) {
   return s ? s[0].toUpperCase() + s.slice(1) : s
 }
 
-/* -------------------- Styles -------------------- */
+/* -------------------- Base Styles (Desktop-First) -------------------- */
 const styles: Record<string, React.CSSProperties> = {
   main: {
     maxWidth: 1100,
@@ -259,8 +263,7 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '12px 16px',
     borderRadius: 12,
     border: '1px solid rgba(0,0,0,.12)',
-    background:
-      'linear-gradient(180deg, #111, #0b0b0b)',
+    background: 'linear-gradient(180deg, #111, #0b0b0b)',
     color: '#fff',
     fontWeight: 800,
     cursor: 'pointer',
@@ -327,27 +330,95 @@ const styles: Record<string, React.CSSProperties> = {
     margin: '8px 0 0',
     opacity: 0.8,
   },
-  /* responsive */
-  '@media( max-width: 880px )': {} as any,
 }
 
-// simple responsive tweak via injected style tag (optional)
-if (typeof document !== 'undefined') {
-  const css = `
-  @media (max-width: 880px) {
-    main[data-upgrade] .wrap {
-      display: block;
-    }
-    main[data-upgrade] .sideCard {
-      position: static;
-      margin-top: 12px;
-    }
-  }`
-  const id = 'upgrade-inline-media'
-  if (!document.getElementById(id)) {
-    const el = document.createElement('style')
-    el.id = id
-    el.innerHTML = css
-    document.head.appendChild(el)
+/* -------------------- Responsive CSS (Mobile-First Tweaks) -------------------- */
+const responsiveCss = `
+/* bis 980px: Layout von 2 Spalten auf 1 Spalte umschalten, Typografie skalieren */
+@media (max-width: 980px) {
+  [data-upgrade] [data-hero] {
+    padding: 36px 16px;
+    border-radius: 16px;
+  }
+  [data-upgrade] h1 {
+    font-size: 34px !important;
+  }
+  [data-upgrade] .wrap {
+    display: block !important;
+  }
+  [data-upgrade] .sideCard {
+    position: static !important;
+    margin-top: 14px !important;
+  }
+  [data-upgrade] [data-card] {
+    padding: 16px !important;
+  }
+  [data-upgrade] [data-card] .features {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
   }
 }
+
+/* bis 720px: engere Paddings, größere Touch-Ziele, kleinere Sidecard-Spacings */
+@media (max-width: 720px) {
+  [data-upgrade] {
+    padding: 0 12px !important;
+  }
+  [data-upgrade] [data-hero] {
+    padding: 28px 14px !important;
+  }
+  [data-upgrade] h1 {
+    font-size: 28px !important;
+    line-height: 1.15 !important;
+  }
+  [data-upgrade] [data-card] .features {
+    grid-template-columns: 1fr !important;
+  }
+  [data-upgrade] button[type="submit"] {
+    padding: 14px 18px !important;
+    font-size: 17px !important;
+    border-radius: 14px !important;
+  }
+  [data-upgrade] .trustPill {
+    font-size: 11px !important;
+    padding: 6px 8px !important;
+  }
+}
+
+/* bis 520px: Kompaktere Preise/Abstände, bessere Lesbarkeit */
+@media (max-width: 520px) {
+  [data-upgrade] [data-card] .price {
+    font-size: 34px !important;
+  }
+  [data-upgrade] [data-card] .priceUnit {
+    font-size: 13px !important;
+  }
+  [data-upgrade] [data-card] .priceNote {
+    font-size: 11px !important;
+  }
+  [data-upgrade] [data-card] .planTitle {
+    font-size: 20px !important;
+  }
+  [data-upgrade] [data-card] .planSubtitle {
+    font-size: 13px !important;
+  }
+}
+
+/* Dark Mode (optional) */
+@media (prefers-color-scheme: dark) {
+  [data-upgrade] [data-card],
+  [data-upgrade] .sideCard {
+    background: #0b0b0b !important;
+    color: #eaeaea !important;
+    border-color: rgba(255,255,255,.08) !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,.5) !important;
+  }
+  [data-upgrade] .features li {
+    background: #0e0e0e !important;
+    border-color: rgba(255,255,255,.06) !important;
+  }
+  [data-upgrade] .trustPill {
+    background: #0e0e0e !important;
+    border-color: rgba(255,255,255,.06) !important;
+  }
+}
+`
