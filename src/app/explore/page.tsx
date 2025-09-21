@@ -7,6 +7,17 @@ import { desc, eq, count } from 'drizzle-orm'
 const PAGE_SIZE = 12
 export const dynamic = 'force-dynamic'
 
+async function coverOk(url: string | null | undefined): Promise<boolean> {
+  if (!url) return false
+  try {
+    const res = await fetch(url, { method: 'HEAD', cache: 'no-store' })
+    // 200-299 ok; 204 ohne Body ist auch ok
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
 // Next.js 15: searchParams ist ein Promise → awaiten
 export default async function ExplorePage({
   searchParams,
@@ -18,7 +29,7 @@ export default async function ExplorePage({
   const pageNum = Number(rawPage)
   const page = Number.isFinite(pageNum) && pageNum > 0 ? Math.floor(pageNum) : 1
 
-  // Total zählen
+  // Gesamtzahl (nur öffentliche)
   const [{ c }] = await db
     .select({ c: count() })
     .from(gardens)
@@ -29,8 +40,8 @@ export default async function ExplorePage({
   const safePage = Math.min(Math.max(page, 1), totalPages)
   const offset = (safePage - 1) * PAGE_SIZE
 
-  // Items holen
-  const items = await db
+  // Roh-Items laden
+  const rawItems = await db
     .select({
       id: gardens.id,
       title: gardens.title,
@@ -42,6 +53,12 @@ export default async function ExplorePage({
     .orderBy(desc(gardens.createdAt))
     .limit(PAGE_SIZE)
     .offset(offset)
+
+  // Nur solche behalten, deren Bild erreichbar ist
+  const checks = await Promise.all(
+    rawItems.map(async (g) => ({ g, ok: await coverOk(g.coverUrl) }))
+  )
+  const items = checks.filter(x => x.ok).map(x => x.g)
 
   return (
     <main style={{ maxWidth: 1200, margin: '40px auto', padding: '0 16px' }}>
@@ -68,7 +85,7 @@ export default async function ExplorePage({
       </header>
 
       {items.length === 0 ? (
-        <p style={{ marginTop: 20 }}>Keine Einträge vorhanden.</p>
+        <p style={{ marginTop: 20 }}>Keine Einträge mit gültigem Cover vorhanden.</p>
       ) : (
         <div
           style={{
@@ -100,15 +117,12 @@ export default async function ExplorePage({
                   overflow: 'hidden',
                 }}
               >
-                {/* Du kannst hier optional next/image einsetzen */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                {g.coverUrl ? (
-                  <img
-                    src={g.coverUrl}
-                    alt={g.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
-                ) : null}
+                <img
+                  src={g.coverUrl}
+                  alt={g.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
               </div>
               <div style={{ padding: 10 }}>
                 <div
