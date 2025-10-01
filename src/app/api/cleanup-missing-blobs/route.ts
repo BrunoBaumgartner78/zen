@@ -1,12 +1,9 @@
-// src/app/api/cleanup-missing-blobs/route.ts
 import { NextResponse } from 'next/server'
 import { db } from '@/db/db'
 import { gardens } from '@/db/schema-gardens'
-import { eq } from 'drizzle-orm'
-import { del } from '@vercel/blob'
-import { sql } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 
-// Autorisierung (gleich wie bei cleanup-expired)
+// Auth (wie gehabt)
 function isAuthorized(req: Request) {
   const url = new URL(req.url)
   const auth = req.headers.get('authorization') || ''
@@ -19,6 +16,8 @@ function isAuthorized(req: Request) {
   return { ok: false, reason: 'Invalid secret' }
 }
 
+export const runtime = 'nodejs'
+
 async function handle(req: Request) {
   const auth = isAuthorized(req)
   if (!auth.ok) {
@@ -26,47 +25,61 @@ async function handle(req: Request) {
   }
 
   const url = new URL(req.url)
-  const cap = Math.max(1, Math.min(500, Number(url.searchParams.get('max') ?? 100)))
-  const dryRun = url.searchParams.get('dry') === '1'
+  const cap   = Math.max(1, Math.min(500, Number(url.searchParams.get('max') ?? 100)))
+  const dry   = url.searchParams.get('dry') === '1'
+  const onlyPublic = url.searchParams.get('onlyPublic') !== '0' // default true
 
-  // Kandidaten: alle gardens mit coverUrl
-  const rows = await db.select({
-    id: gardens.id,
-    coverUrl: gardens.coverUrl,
-  }).from(gardens).limit(cap)
+  // Kandidaten: sichtbare oder alle
+  const rows = await db
+    .select({
+      id: gardens.id,
+      coverUrl: gardens.coverUrl,
+      isExpired: gardens.isExpired,
+    })
+    .from(gardens)
+    .where(onlyPublic
+      ? and(eq(gardens.isPublic, true), eq(gardens.isExpired, false))
+      : eq(gardens.isExpired, false)
+    )
+    .limit(cap)
 
   let checked = 0
-  let missing: { id: string; coverUrl: string }[] = []
-  let deleted = 0
+  let missing = 0
+  const sampleMissing: { id: string; coverUrl: string }[] = []
 
   for (const g of rows) {
     checked++
     try {
-      const res = await fetch(g.coverUrl, { method: 'HEAD' })
+      const res = await fetch(g.coverUrl, { method: 'HEAD', cache: 'no-store' })
       if (!res.ok) {
-        missing.push({ id: g.id, coverUrl: g.coverUrl })
-        if (!dryRun) {
-          // Garden-Eintrag löschen
-          await db.delete(gardens).where(eq(gardens.id, g.id))
-          // Blob löschen (falls URL auf Vercel Blob zeigt)
-          if (g.coverUrl.includes('.public.blob.vercel-storage.com/')) {
-            await del(g.coverUrl)
-          }
-          deleted++
+        missing++
+        if (sampleMissing.length < 10) sampleMissing.push({ id: g.id, coverUrl: g.coverUrl })
+        if (!dry) {
+          await db
+            .update(gardens)
+            .set({ isExpired: true, expiredAt: new Date() })
+            .where(eq(gardens.id, g.id))
         }
       }
     } catch {
-      missing.push({ id: g.id, coverUrl: g.coverUrl })
+      missing++
+      if (sampleMissing.length < 10) sampleMissing.push({ id: g.id, coverUrl: g.coverUrl })
+      if (!dry) {
+        await db
+          .update(gardens)
+          .set({ isExpired: true, expiredAt: new Date() })
+          .where(eq(gardens.id, g.id))
+      }
     }
   }
 
   return NextResponse.json({
     ok: true,
     checked,
-    missing: missing.length,
-    deleted,
-    dryRun,
-    sample: missing.slice(0, 5), // kleine Vorschau
+    missing,
+    markedExpired: dry ? 0 : missing,
+    dryRun: dry,
+    sampleMissing,
   })
 }
 

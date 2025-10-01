@@ -2,23 +2,31 @@
 import Link from 'next/link'
 import { db } from '@/db/db'
 import { gardens } from '@/db/schema-gardens'
-import { desc, eq, count } from 'drizzle-orm'
+import { desc, eq, and, isNotNull, count } from 'drizzle-orm'
 
 const PAGE_SIZE = 12
 export const dynamic = 'force-dynamic'
 
+// Bild wirklich erreichbar?
 async function coverOk(url: string | null | undefined): Promise<boolean> {
   if (!url) return false
   try {
-    const res = await fetch(url, { method: 'HEAD', cache: 'no-store' })
-    // 200-299 ok; 204 ohne Body ist auch ok
-    return res.ok
+    // Minimaler GET (1 Byte), kein Cache, und prüfe Content-Type = image/*
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: { Range: 'bytes=0-0' },
+      cache: 'no-store',
+      // Timeout-Guard (optional, Next 15 unterstützt AbortController)
+      // signal: AbortSignal.timeout?.(3000) as any,
+    })
+    if (!res.ok) return false
+    const ct = res.headers.get('content-type') || ''
+    return ct.startsWith('image/')
   } catch {
     return false
   }
 }
 
-// Next.js 15: searchParams ist ein Promise → awaiten
 export default async function ExplorePage({
   searchParams,
 }: {
@@ -29,18 +37,21 @@ export default async function ExplorePage({
   const pageNum = Number(rawPage)
   const page = Number.isFinite(pageNum) && pageNum > 0 ? Math.floor(pageNum) : 1
 
-  // Gesamtzahl (nur öffentliche)
+  // Zähle nur Einträge mit (vermutlich) gültigem Cover:
+  //   - isPublic = true
+  //   - coverUrl IS NOT NULL
+  //   - optional: isExpired = false (falls du das Feld hast)
   const [{ c }] = await db
     .select({ c: count() })
     .from(gardens)
-    .where(eq(gardens.isPublic, true))
+    .where(and(eq(gardens.isPublic, true), isNotNull(gardens.coverUrl)))
 
   const total = Number(c ?? 0)
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const safePage = Math.min(Math.max(page, 1), totalPages)
   const offset = (safePage - 1) * PAGE_SIZE
 
-  // Roh-Items laden
+  // Rohdaten (nur mit coverUrl!=NULL) holen
   const rawItems = await db
     .select({
       id: gardens.id,
@@ -49,16 +60,16 @@ export default async function ExplorePage({
       createdAt: gardens.createdAt,
     })
     .from(gardens)
-    .where(eq(gardens.isPublic, true))
+    .where(and(eq(gardens.isPublic, true), isNotNull(gardens.coverUrl)))
     .orderBy(desc(gardens.createdAt))
-    .limit(PAGE_SIZE)
+    .limit(PAGE_SIZE * 3)   // etwas mehr holen, um nach Filterung noch 12 zu haben
     .offset(offset)
 
-  // Nur solche behalten, deren Bild erreichbar ist
+  // Filtere, falls das Bild trotz coverUrl fehlt/404 ist
   const checks = await Promise.all(
     rawItems.map(async (g) => ({ g, ok: await coverOk(g.coverUrl) }))
   )
-  const items = checks.filter(x => x.ok).map(x => x.g)
+  const items = checks.filter(x => x.ok).slice(0, PAGE_SIZE).map(x => x.g)
 
   return (
     <main style={{ maxWidth: 1200, margin: '40px auto', padding: '0 16px' }}>
@@ -119,7 +130,7 @@ export default async function ExplorePage({
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={g.coverUrl}
+                  src={g.coverUrl!}
                   alt={g.title}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
