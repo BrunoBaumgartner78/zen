@@ -2,31 +2,12 @@
 import Link from 'next/link'
 import { db } from '@/db/db'
 import { gardens } from '@/db/schema-gardens'
-import { desc, eq, and, isNotNull, count } from 'drizzle-orm'
+import { desc, eq, and, isNotNull, count, or, isNull } from 'drizzle-orm'
 
 const PAGE_SIZE = 12
 export const dynamic = 'force-dynamic'
 
-// Bild wirklich erreichbar?
-async function coverOk(url: string | null | undefined): Promise<boolean> {
-  if (!url) return false
-  try {
-    // Minimaler GET (1 Byte), kein Cache, und prüfe Content-Type = image/*
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: { Range: 'bytes=0-0' },
-      cache: 'no-store',
-      // Timeout-Guard (optional, Next 15 unterstützt AbortController)
-      // signal: AbortSignal.timeout?.(3000) as any,
-    })
-    if (!res.ok) return false
-    const ct = res.headers.get('content-type') || ''
-    return ct.startsWith('image/')
-  } catch {
-    return false
-  }
-}
-
+// Server Component
 export default async function ExplorePage({
   searchParams,
 }: {
@@ -37,22 +18,27 @@ export default async function ExplorePage({
   const pageNum = Number(rawPage)
   const page = Number.isFinite(pageNum) && pageNum > 0 ? Math.floor(pageNum) : 1
 
-  // Zähle nur Einträge mit (vermutlich) gültigem Cover:
-  //   - isPublic = true
-  //   - coverUrl IS NOT NULL
-  //   - optional: isExpired = false (falls du das Feld hast)
+  // Count und Items verwenden exakt die gleichen Bedingungen:
+  // - öffentlich
+  // - nicht abgelaufen (isExpired = false ODER NULL)
+  // - hat eine Cover-URL
+  const whereCond = and(
+    eq(gardens.isPublic, true),
+    or(eq(gardens.isExpired, false), isNull(gardens.isExpired)),
+    isNotNull(gardens.coverUrl)
+  )
+
   const [{ c }] = await db
     .select({ c: count() })
     .from(gardens)
-    .where(and(eq(gardens.isPublic, true), isNotNull(gardens.coverUrl)))
+    .where(whereCond)
 
   const total = Number(c ?? 0)
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const safePage = Math.min(Math.max(page, 1), totalPages)
   const offset = (safePage - 1) * PAGE_SIZE
 
-  // Rohdaten (nur mit coverUrl!=NULL) holen
-  const rawItems = await db
+  const items = await db
     .select({
       id: gardens.id,
       title: gardens.title,
@@ -60,16 +46,10 @@ export default async function ExplorePage({
       createdAt: gardens.createdAt,
     })
     .from(gardens)
-    .where(and(eq(gardens.isPublic, true), isNotNull(gardens.coverUrl)))
+    .where(whereCond)
     .orderBy(desc(gardens.createdAt))
-    .limit(PAGE_SIZE * 3)   // etwas mehr holen, um nach Filterung noch 12 zu haben
+    .limit(PAGE_SIZE)
     .offset(offset)
-
-  // Filtere, falls das Bild trotz coverUrl fehlt/404 ist
-  const checks = await Promise.all(
-    rawItems.map(async (g) => ({ g, ok: await coverOk(g.coverUrl) }))
-  )
-  const items = checks.filter(x => x.ok).slice(0, PAGE_SIZE).map(x => x.g)
 
   return (
     <main style={{ maxWidth: 1200, margin: '40px auto', padding: '0 16px' }}>
@@ -96,7 +76,7 @@ export default async function ExplorePage({
       </header>
 
       {items.length === 0 ? (
-        <p style={{ marginTop: 20 }}>Keine Einträge mit gültigem Cover vorhanden.</p>
+        <p style={{ marginTop: 20 }}>Keine Einträge vorhanden.</p>
       ) : (
         <div
           style={{
@@ -124,16 +104,24 @@ export default async function ExplorePage({
                 style={{
                   width: '100%',
                   aspectRatio: '4 / 3',
-                  background: '#eee',
+                  background: '#eee', // Fallback-Hintergrund
                   overflow: 'hidden',
                 }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={g.coverUrl!}
-                  alt={g.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                />
+                {g.coverUrl ? (
+                  <img
+                    src={g.coverUrl}
+                    alt={g.title}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      display: 'block',
+                    }}
+                    // Wichtig: KEIN onError in Server Components
+                  />
+                ) : null}
               </div>
               <div style={{ padding: 10 }}>
                 <div
